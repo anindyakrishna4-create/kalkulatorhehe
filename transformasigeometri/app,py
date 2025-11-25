@@ -1,0 +1,176 @@
+import streamlit as st
+import matplotlib.pyplot as plt
+import numpy as np
+
+# --- Konfigurasi Halaman ---
+st.set_page_config(
+    page_title="Virtual Lab Transformasi Geometri",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+def create_plot(original_points, transformed_points, title):
+    """Fungsi untuk membuat plot Matplotlib"""
+    fig, ax = plt.subplots(figsize=(6, 6))
+
+    # Batas plot
+    limit = 10
+    ax.set_xlim(-limit, limit)
+    ax.set_ylim(-limit, limit)
+    ax.set_xticks(np.arange(-limit, limit + 1, 1))
+    ax.set_yticks(np.arange(-limit, limit + 1, 1))
+    ax.grid(True, linestyle='--', alpha=0.6)
+    ax.set_aspect('equal', adjustable='box')
+    
+    # Sumbu X dan Y
+    ax.axhline(0, color='gray', linewidth=1)
+    ax.axvline(0, color='gray', linewidth=1)
+
+    # Plot titik asli (biru)
+    ax.plot(original_points[:, 0], original_points[:, 1], 'bo-', label='Titik Asli', linewidth=2, markersize=8)
+    # Plot titik hasil transformasi (merah)
+    ax.plot(transformed_points[:, 0], transformed_points[:, 1], 'r*-', label='Titik Hasil Transformasi', linewidth=2, markersize=8)
+
+    ax.set_title(title)
+    ax.legend()
+    st.pyplot(fig)
+
+def main():
+    """Fungsi utama aplikasi Streamlit"""
+    st.title("🔬 Virtual Lab Transformasi Geometri")
+    st.markdown("""
+    Selamat datang di lab interaktif! Pilih jenis transformasi di sidebar (samping kiri) untuk memulai eksperimen.
+    Anda bisa memvisualisasikan bagaimana **Rotasi**, **Dilatasi**, **Refleksi**, dan **Translasi** mengubah posisi suatu titik.
+    """)
+
+    st.sidebar.header("⚙️ Pengaturan Transformasi")
+    
+    # Pilihan Transformasi
+    transform_type = st.sidebar.radio(
+        "Pilih Jenis Transformasi:",
+        ('Translasi', 'Rotasi', 'Dilatasi', 'Refleksi')
+    )
+    
+    st.markdown("---")
+
+    # Input Titik Awal
+    st.header("Titik Koordinat Awal (P)")
+    col1, col2 = st.columns(2)
+    with col1:
+        x_start = st.slider("Koordinat X (Awal)", -5, 5, 2)
+    with col2:
+        y_start = st.slider("Koordinat Y (Awal)", -5, 5, 3)
+    
+    original_point = np.array([[x_start, y_start]])
+
+    st.subheader(f"Titik Awal: P({x_start}, {y_start})")
+    
+    transformed_point = original_point # Inisialisasi
+
+    # Logika Transformasi Berdasarkan Pilihan
+    
+    if transform_type == 'Translasi':
+        st.header("➡️ Translasi (Pergeseran)")
+        
+        st.write("""
+        **Translasi** memindahkan setiap titik sejauh jarak dan arah yang sama.
+        $$P'(x', y') = P(x, y) + T(a, b)$$
+        """)
+        
+        col_t1, col_t2 = st.columns(2)
+        with col_t1:
+            tx = st.slider("Pergeseran pada Sumbu X (a)", -5, 5, 1)
+        with col_t2:
+            ty = st.slider("Pergeseran pada Sumbu Y (b)", -5, 5, 2)
+            
+        # Perhitungan Translasi
+        T = np.array([tx, ty])
+        transformed_point = original_point + T
+        
+        st.success(f"Vektor Translasi T = ({tx}, {ty})")
+
+    elif transform_type == 'Rotasi':
+        st.header("🔄 Rotasi (Perputaran)")
+        
+        st.write("""
+        **Rotasi** memutar titik mengelilingi titik pusat (dalam lab ini: titik asal O(0,0)) sejauh sudut tertentu ($\\alpha$).
+        $$P'(x', y') = R(O, \\alpha) \\cdot P(x, y)$$
+        """)
+        
+        angle_deg = st.slider("Sudut Rotasi (Derajat)", -360, 360, 90, 5)
+        angle_rad = np.radians(angle_deg)
+        
+        # Matriks Rotasi terhadap O(0,0)
+        R = np.array([
+            [np.cos(angle_rad), -np.sin(angle_rad)],
+            [np.sin(angle_rad), np.cos(angle_rad)]
+        ])
+        
+        # Perhitungan Rotasi (P * R^T)
+        transformed_point = np.dot(original_point, R.T)
+        
+        st.success(f"Sudut Rotasi = {angle_deg}° (Pusat Rotasi O(0,0))")
+
+    elif transform_type == 'Dilatasi':
+        st.header(" 확대 Dilatasi (Perkalian/Penskalaan)")
+        
+        st.write("""
+        **Dilatasi** mengubah ukuran objek tanpa mengubah bentuknya, berdasarkan faktor skala (k) dari titik pusat (dalam lab ini: titik asal O(0,0)).
+        $$P'(x', y') = k \\cdot P(x, y)$$
+        """)
+        
+        k = st.slider("Faktor Skala (k)", -3.0, 3.0, 2.0, 0.1)
+        
+        # Perhitungan Dilatasi
+        transformed_point = original_point * k
+        
+        st.success(f"Faktor Skala k = {k} (Pusat Dilatasi O(0,0))")
+        
+    elif transform_type == 'Refleksi':
+        st.header("↔️ Refleksi (Pencerminan)")
+        
+        st.write("""
+        **Refleksi** membalik objek melintasi suatu garis (sumbu cermin).
+        $$P'(x', y') = M_{cermin} \\cdot P(x, y)$$
+        """)
+
+        reflection_axis = st.selectbox(
+            "Pilih Garis Cermin:",
+            ('Sumbu X (y=0)', 'Sumbu Y (x=0)', 'Garis y=x', 'Garis y=-x')
+        )
+        
+        # Matriks Refleksi
+        if reflection_axis == 'Sumbu X (y=0)':
+            # M_x = [[1, 0], [0, -1]]
+            M = np.array([[1, 0], [0, -1]])
+            st.success("Refleksi terhadap Sumbu X: P'(x, -y)")
+        elif reflection_axis == 'Sumbu Y (x=0)':
+            # M_y = [[-1, 0], [0, 1]]
+            M = np.array([[-1, 0], [0, 1]])
+            st.success("Refleksi terhadap Sumbu Y: P'(-x, y)")
+        elif reflection_axis == 'Garis y=x':
+            # M_yx = [[0, 1], [1, 0]]
+            M = np.array([[0, 1], [1, 0]])
+            st.success("Refleksi terhadap Garis y=x: P'(y, x)")
+        elif reflection_axis == 'Garis y=-x':
+            # M_ynx = [[0, -1], [-1, 0]]
+            M = np.array([[0, -1], [-1, 0]])
+            st.success("Refleksi terhadap Garis y=-x: P'(-y, -x)")
+            
+        # Perhitungan Refleksi (P * M^T)
+        transformed_point = np.dot(original_point, M.T)
+        
+        
+    # --- Visualisasi dan Hasil ---
+    st.markdown("---")
+    
+    tx = round(transformed_point[0, 0], 2)
+    ty = round(transformed_point[0, 1], 2)
+    st.header(f"Titik Hasil Transformasi (P'): ({tx}, {ty})")
+
+    # Menampilkan Plot
+    create_plot(original_point, transformed_point, f"Transformasi: {transform_type}")
+
+
+if __name__ == '__main__':
+    main()
