@@ -39,18 +39,11 @@ st.sidebar.metric(
 )
 
 # =============================================================
-#           BAGIAN 2: KONTEN UTAMA
+#           BAGIAN 2: KONTEN UTAMA & PERHITUNGAN
 # =============================================================
-# Karena hanya satu konten yang tersisa, kita tidak perlu menggunakan tabs, 
-# tetapi jika ingin tetap menggunakan tab untuk hasil, kita ubah st.tabs.
 
-# Jika Anda ingin hanya menampilkan Hasil tanpa tab (disarankan jika hanya satu konten):
 st.header("📊 Hasil Perhitungan Trigonometri")
 
-# Jika Anda ingin tetap menggunakan tab (meskipun hanya satu tab):
-# tab_hasil = st.tabs(["📊 Hasil & Konsep"])[0] 
-# with tab_hasil:
-    
 # Hitung Nilai Trigonometri (sin, cos, tan)
 sin_theta = sisi_depan / sisi_miring
 cos_theta = sisi_samping / sisi_miring
@@ -69,11 +62,11 @@ Panjang Sisi yang Digunakan:
 """)
 st.markdown("---")
 
-# Membagi konten hasil menjadi dua kolom kecil
-col_rasio, col_sudut = st.columns([2, 1])
+# --- TAB UNTUK HASIL (RASIO, SUDUT, KONSEP) ---
+tab_rasio, tab_sudut, tab_konsep = st.tabs(["Rasio Trigonometri", "Nilai Sudut", "Konsep SOH CAH TOA"])
 
-with col_rasio:
-    st.subheader("1. Rasio Trigonometri (SOH CAH TOA)")
+with tab_rasio:
+    st.subheader("Rasio $\sin, \cos, \tan$")
     
     # Tampilkan Rumus dan Hasil dalam Tabel
     st.table({
@@ -85,20 +78,22 @@ with col_rasio:
             f"$\\frac{{a}}{{b}} = {tan_theta:.4f}$"
         ]
     })
+    st.markdown("""
     
-    st.markdown("---")
-    st.subheader("💡 Konsep Dasar")
-    st.success("""
-    * **SOH**: **S**inus = **O**pposite (Depan) / **H**ypotenuse (Miring)
-    * **CAH**: **C**osinus = **A**djacent (Samping) / **H**ypotenuse (Miring)
-    * **TOA**: **T**angen = **O**pposite (Depan) / **A**djacent (Samping)
+
+[Image of a right-angled triangle with sides labeled 'a' (opposite), 'b' (adjacent), and 'c' (hypotenuse) and an angle labeled $\theta$]
+
+    *Diagram di atas menunjukkan hubungan sisi-sisi dalam rasio ini.*
     """)
 
-with col_sudut:
-    st.subheader("2. Nilai Sudut")
+with tab_sudut:
+    st.subheader("Nilai Sudut-Sudut Segitiga")
+    
+    # Menggunakan kolom di dalam tab agar metrik terlihat berdampingan
+    col_teta, col_beta, col_siku = st.columns(3)
     
     # Sudut Theta
-    st.metric(
+    col_teta.metric(
         label="Sudut $\\theta$", 
         value=f"{theta_deg:.2f}°",
         delta="Sudut yang dianalisis"
@@ -106,11 +101,19 @@ with col_sudut:
     
     # Sudut Beta (Sudut lainnya)
     beta_deg = 90.0 - theta_deg
-    st.metric(
+    col_beta.metric(
         label="Sudut $\\beta$", 
         value=f"{beta_deg:.2f}°",
         delta="Sudut $90° - \\theta$"
     )
     
     # Sudut Siku-siku
-    st.metric(label="Sudut Siku-siku", value="90.00°")
+    col_siku.metric(label="Sudut Siku-siku", value="90.00°")
+
+with tab_konsep:
+    st.subheader("💡 Konsep Dasar (SOH CAH TOA)")
+    st.success("""
+    * **SOH**: **S**inus = **O**pposite (Depan) / **H**ypotenuse (Miring)
+    * **CAH**: **C**osinus = **A**djacent (Samping) / **H**ypotenuse (Miring)
+    * **TOA**: **T**angen = **O**pposite (Depan) / **A**djacent (Samping)
+    """)
