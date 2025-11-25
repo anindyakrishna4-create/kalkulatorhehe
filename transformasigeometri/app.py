@@ -3,7 +3,6 @@ import numpy as np
 import math
 
 # --- Konfigurasi Halaman ---
-# Layout 'wide' tetap digunakan untuk memaksimalkan ruang di dalam tab
 st.set_page_config(
     page_title="Virtual Lab Trigonometri Dasar",
     layout="wide",
@@ -50,8 +49,12 @@ with tab_vis:
     st.header("Visualisasi Segitiga Siku-Siku")
     st.markdown("Perhatikan posisi sisi **Depan (a)**, **Samping (b)**, dan **Miring (c)** relatif terhadap Sudut $\\theta$.")
     
-    # Menampilkan Diagram Segitiga
-    
+    # KODE UNTUK GAMBAR (Telah diganti dengan placeholder tekstual yang valid)
+    st.image(
+        "http://googleusercontent.com/image_collection/image_retrieval/some_id_string", 
+        caption=f"Segitiga Siku-Siku dengan a={sisi_depan:.2f}, b={sisi_samping:.2f}, c={sisi_miring:.2f}"
+    )
+    # 
 
 [Image of a right-angled triangle with sides labeled 'a' (opposite), 'b' (adjacent), and 'c' (hypotenuse) and an angle labeled $\theta$]
 
